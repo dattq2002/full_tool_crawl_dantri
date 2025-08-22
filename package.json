@@ -1,0 +1,14 @@
+{
+  "name": "tool_create_prompt_trainning_ai",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "crawl": "node crawler_auto_download_audio/crawler.js",
+    "segment": "node crawler_auto_download_audio/extract_random_segments.js",
+    "python": "python Speech_to_Text_tool/audio_processor.py"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

@@ -1,0 +1,33 @@
+{
+  "name": "crawler_auto_download_audio",
+  "version": "1.0.0",
+  "description": "AI training data pipeline - Multi-category news audio crawler with voice segmentation",
+  "main": "crawler.js",
+  "scripts": {
+    "crawl": "node crawler.js",
+    "segment": "node extract_random_segments.js",
+    "manifest": "node generate_manifest.js",
+    "lint": "eslint *.js",
+    "lint:fix": "eslint *.js --fix",
+    "format": "prettier --write *.js *.json *.md"
+  },
+  "keywords": [
+    "crawler",
+    "audio",
+    "ai",
+    "training",
+    "vietnamese",
+    "news"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.2.5"
+  }
+}
