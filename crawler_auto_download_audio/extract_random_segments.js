@@ -268,8 +268,9 @@ function processAudioFile(audioInfo) {
     const targetFolder = getSegmentFolder(Math.floor(segmentDuration))
     const targetFolderPath = path.join(OUT_DIR, targetFolder)
 
-    // Tạo tên file output chỉ là category_article.wav
-    const outputFileName = `${category}_${article}.wav`
+    const milisecond = Date.now()
+    // Tạo tên file output chỉ là category_article_.wav
+    const outputFileName = `${category}_${article}_${milisecond}.wav`
     const outputPath = path.join(targetFolderPath, outputFileName)
 
     // Extract segment

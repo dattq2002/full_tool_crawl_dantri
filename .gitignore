@@ -3,3 +3,6 @@ dantri_segments
 node_modules
 transcribed_results
 __pycache__
+prompt.txt
+prompt_fixed.txt
+fix_prompt_log.txt

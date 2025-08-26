@@ -7,6 +7,7 @@
     "crawl": "node crawler.js",
     "segment": "node extract_random_segments.js",
     "manifest": "node generate_manifest.js",
+    "prompt": "node fix_prompt_file.js",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
     "format": "prettier --write *.js *.json *.md"
