@@ -6,8 +6,9 @@
   "scripts": {
     "crawl": "node crawler.js",
     "segment": "node extract_random_segments.js",
-    "manifest": "node generate_manifest.js",
-    "prompt": "node fix_prompt_file.js",
+    "stt": "node azure_speech_sdk.js",
+    "prompt": "node fix_prompt_file_V2.js",
+    "cp": "node check_prompt.js",
     "lint": "eslint *.js",
     "lint:fix": "eslint *.js --fix",
     "format": "prettier --write *.js *.json *.md"
@@ -24,7 +25,11 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.11.0",
-    "cheerio": "^1.1.2"
+    "cheerio": "^1.1.2",
+    "dotenv": "^17.2.1",
+    "fuse.js": "^7.1.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.45.0",
+    "string-similarity": "^4.0.4"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

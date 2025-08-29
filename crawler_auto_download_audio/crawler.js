@@ -6,8 +6,8 @@ const { exec } = require('child_process')
 
 // ===== CẤU HÌNH CHÍNH =====
 const CATEGORIES = [
-  { name: 'xa-hoi', url: 'xa-hoi' },
-  { name: 'kinh-doanh', url: 'kinh-doanh' },
+  // { name: 'xa-hoi', url: 'xa-hoi' },
+  // { name: 'kinh-doanh', url: 'kinh-doanh' }
   { name: 'giai-tri', url: 'giai-tri' },
   { name: 'suc-khoe', url: 'suc-khoe' },
   { name: 'cong-nghe', url: 'cong-nghe' },
@@ -70,6 +70,18 @@ function normalizeForAI(name) {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+// Normalize transcript text for better matching
+function normalizeTranscriptText(text) {
+  if (!text) return ''
+
+  return text
+    .normalize('NFC') // Normalize Unicode to NFC form (keep Vietnamese accents)
+    .replace(/[.,;:!?()[\]{}"''""''–—…/\\|+*=<>&%$#@~`^]/g, ' ') // Remove punctuation but keep accents
+    .replace(/\s+/g, ' ') // Collapse multiple spaces
+    .replace(/\n\s*\n/g, '\n') // Remove empty lines
+    .trim()
 }
 
 // Convert MP3 to WAV PCM16 16kHz mono
@@ -179,6 +191,7 @@ async function downloadAudio(articleUrl, category) {
 
     // THEN: Extract main content selectors
     const selectors = [
+      '.e-magazine__body.dnews__body', // Correct selector for Dân Trí articles
       '.singular-content',
       '.dt-news__content',
       '.article-content',
@@ -325,7 +338,17 @@ async function downloadAudio(articleUrl, category) {
         if (paragraphs.length > 0) break
       }
       if (paragraphs.length > 0) {
-        articleText = paragraphs
+        // Ensure proper spacing between paragraphs
+        const processedParagraphs = paragraphs.map((p) => {
+          let processed = p.trim()
+          // Add period if paragraph doesn't end with punctuation
+          if (!processed.match(/[.!?]$/)) {
+            processed += '.'
+          }
+          return processed
+        })
+
+        articleText = processedParagraphs
           .join('\n\n')
           .replace(/\*{3,}/g, '**')
           .replace(/\*\s*\*/g, '')
@@ -371,10 +394,20 @@ async function downloadAudio(articleUrl, category) {
       })
 
       if (paragraphs.length > 0) {
-        articleText = paragraphs
+        // Ensure proper spacing between paragraphs
+        const processedParagraphs = paragraphs.map((p) => {
+          let processed = p.trim()
+          // Add period if paragraph doesn't end with punctuation
+          if (!processed.match(/[.!?]$/)) {
+            processed += '.'
+          }
+          return processed
+        })
+
+        articleText = processedParagraphs
           .join('\n\n')
           .replace(/\*{3,}/g, '**')
-          .replace(/\*\s*\*/g, '')
+          .replace(/\*\s*\*/g, ' ')
           .replace(/\*{2}\s*\*{2}/g, ' ')
         console.log(`📝 Extracted from all paragraphs with formatting (${articleText.length} chars, captions excluded)`)
       }
@@ -383,10 +416,20 @@ async function downloadAudio(articleUrl, category) {
     // COMBINE SAPO + MAIN CONTENT
     if (sapoText || articleText) {
       const combinedParts = []
-      if (sapoText) combinedParts.push(sapoText)
-      if (articleText) combinedParts.push(articleText)
+      if (sapoText) combinedParts.push(sapoText.trim())
+      if (articleText) combinedParts.push(articleText.trim())
 
-      articleText = combinedParts.join('\n\n')
+      // Ensure proper spacing between sapo and content
+      const processedParts = combinedParts.map((part, index) => {
+        let processed = part
+        // Add period if part doesn't end with punctuation (except for last part)
+        if (index < combinedParts.length - 1 && !processed.match(/[.!?]$/)) {
+          processed += '.'
+        }
+        return processed
+      })
+
+      articleText = processedParts.join('\n\n')
       console.log(
         `📝 Final text: ${sapoText ? 'sapo' : 'no-sapo'} + ${articleText.length > sapoText.length ? 'content' : 'no-content'} = ${articleText.length} total chars`
       )
@@ -476,6 +519,7 @@ async function downloadAudio(articleUrl, category) {
       console.log(`🎵 [${category.name}] Got ${audioCount} voices: [${foundVoices.join(', ')}]`)
 
       // Create metadata.json
+      const normalizedArticleText = normalizeTranscriptText(articleText)
       const metadata = {
         article_id: articleId,
         title: title,
@@ -487,7 +531,8 @@ async function downloadAudio(articleUrl, category) {
         voices: foundVoices,
         audio_files: audioFiles,
         source: 'dantri.com.vn',
-        article_text: articleText
+        article_text: articleText,
+        normalized_article_text: normalizedArticleText
       }
 
       const metadataFile = path.join(folder, 'metadata.json')
@@ -495,10 +540,16 @@ async function downloadAudio(articleUrl, category) {
         fs.writeFileSync(metadataFile, JSON.stringify(metadata, null, 2), 'utf8')
       }
 
-      // Create transcript file with raw text
+      // Create transcript file with normalized text
       const transcriptFile = path.join(folder, 'transcript.txt')
       if (!fs.existsSync(transcriptFile)) {
-        fs.writeFileSync(transcriptFile, `# Transcript: ${title}\n# URL: ${articleUrl}\n\n${articleText}\n`, 'utf8')
+        const normalizedArticleText = normalizeTranscriptText(articleText)
+        fs.writeFileSync(
+          transcriptFile,
+          `# Transcript: ${title}\n# URL: ${articleUrl}\n\n${normalizedArticleText}\n`,
+          'utf8'
+        )
+        console.log(`📝 Created transcript with normalized text (${normalizedArticleText.length} chars)`)
       }
 
       return true

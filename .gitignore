@@ -3,6 +3,8 @@ dantri_segments
 node_modules
 transcribed_results
 __pycache__
-prompt.txt
-prompt_fixed.txt
-fix_prompt_log.txt
+prompt_V2.txt
+prompt_fixed_V2.txt
+fix_prompt_log_V2.txt
+check_prompt_matching_log.txt
+.env

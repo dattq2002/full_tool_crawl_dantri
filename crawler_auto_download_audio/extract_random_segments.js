@@ -173,22 +173,71 @@ function getAllAudioFiles() {
 // Kiểm tra xem file đã được xử lý chưa bằng cách check segments có sẵn
 function isFileAlreadyProcessed(audioInfo) {
   const { category, article, fileName } = audioInfo
-  const voice = fileName.split('__')[1]?.replace('.wav', '') || 'voice'
 
   // Kiểm tra trong tất cả các thư mục segment
   for (const folder of FOLDERS) {
     const folderPath = path.join(OUT_DIR, folder)
     if (fs.existsSync(folderPath)) {
       const files = fs.readdirSync(folderPath)
-      // Tìm file bắt đầu với pattern này
-      const pattern = `${category}_${article}`
-      if (files.some((f) => f.startsWith(pattern))) {
+      // Tìm file bắt đầu với pattern chính xác: category_article_
+      const pattern = `${category}_${article}_`
+      if (files.some((f) => f.startsWith(pattern) && f.endsWith('.wav'))) {
         return true
       }
     }
   }
 
   return false
+}
+
+// Kiểm tra xem một folder (category/article) đã được xử lý chưa
+function isFolderAlreadyProcessed(category, article) {
+  // Kiểm tra trong tất cả các thư mục segment
+  for (const folder of FOLDERS) {
+    const folderPath = path.join(OUT_DIR, folder)
+    if (fs.existsSync(folderPath)) {
+      const files = fs.readdirSync(folderPath)
+      // Tìm file bắt đầu với pattern: category_article_
+      const pattern = `${category}_${article}_`
+      if (files.some((f) => f.startsWith(pattern) && f.endsWith('.wav'))) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+// Lấy thống kê chi tiết về tình trạng xử lý
+function getProcessingStats() {
+  const stats = {
+    totalFolders: 0,
+    processedFolders: 0,
+    unprocessedFolders: 0,
+    processedFoldersList: [],
+    unprocessedFoldersList: []
+  }
+
+  const categories = fs.readdirSync(SRC_DIR).filter((f) => fs.statSync(path.join(SRC_DIR, f)).isDirectory())
+
+  for (const category of categories) {
+    const catPath = path.join(SRC_DIR, category)
+    const articles = fs.readdirSync(catPath).filter((f) => fs.statSync(path.join(catPath, f)).isDirectory())
+
+    for (const article of articles) {
+      stats.totalFolders++
+
+      if (isFolderAlreadyProcessed(category, article)) {
+        stats.processedFolders++
+        stats.processedFoldersList.push(`${category}/${article}`)
+      } else {
+        stats.unprocessedFolders++
+        stats.unprocessedFoldersList.push(`${category}/${article}`)
+      }
+    }
+  }
+
+  return stats
 }
 
 function getWavFiles(folder) {
@@ -306,10 +355,37 @@ function processAll() {
   // Initialize global stats
   globalStats.startTime = Date.now()
 
+  // Hiển thị thống kê chi tiết về tình trạng xử lý
+  console.log(`\n📊 PROCESSING STATUS CHECK:`)
+  const stats = getProcessingStats()
+  console.log(`   📁 Total folders: ${stats.totalFolders}`)
+  console.log(`   ✅ Already processed: ${stats.processedFolders}`)
+  console.log(`   🔄 Need processing: ${stats.unprocessedFolders}`)
+
+  if (stats.processedFolders > 0) {
+    console.log(`\n📋 Processed folders (${stats.processedFolders}):`)
+    stats.processedFoldersList.slice(0, 10).forEach((folder) => {
+      console.log(`   ✅ ${folder}`)
+    })
+    if (stats.processedFolders > 10) {
+      console.log(`   ... and ${stats.processedFolders - 10} more`)
+    }
+  }
+
+  if (stats.unprocessedFolders > 0) {
+    console.log(`\n📋 Folders to process (${stats.unprocessedFolders}):`)
+    stats.unprocessedFoldersList.slice(0, 10).forEach((folder) => {
+      console.log(`   🔄 ${folder}`)
+    })
+    if (stats.unprocessedFolders > 10) {
+      console.log(`   ... and ${stats.unprocessedFolders - 10} more`)
+    }
+  }
+
   // Lấy tất cả audio files
   const allAudioFiles = getAllAudioFiles()
   globalStats.totalFiles = allAudioFiles.length
-  console.log(`📊 Found ${allAudioFiles.length} total audio files`)
+  console.log(`\n📊 Found ${allAudioFiles.length} total audio files`)
 
   // Lọc ra những file chưa được xử lý
   const unprocessedFiles = allAudioFiles.filter((audioInfo) => !isFileAlreadyProcessed(audioInfo))
@@ -317,7 +393,7 @@ function processAll() {
   console.log(`✅ Already processed: ${allAudioFiles.length - unprocessedFiles.length}`)
 
   if (unprocessedFiles.length === 0) {
-    console.log('🎉 All audio files have already been processed!')
+    console.log('\n🎉 All audio files have already been processed!')
 
     // Tạo báo cáo hoàn thành
     const reportPath = saveProgressReport('completed')
@@ -327,6 +403,7 @@ function processAll() {
     return
   }
 
+  console.log(`\n🚀 Starting segmentation process...`)
   let processedFiles = 0
   let skippedFiles = 0
 
@@ -380,13 +457,63 @@ function processAll() {
     }
   })
   console.log(`📊 Grand total segments: ${totalCount}`)
+}
 
-  // Tạo báo cáo cuối cùng
-  const finalReportPath = saveProgressReport('completed')
-  if (finalReportPath) {
-    console.log(`\n📋 Final report saved: ${path.basename(finalReportPath)}`)
-    console.log(`📁 Report location: ${finalReportPath}`)
+// Function để chỉ kiểm tra trạng thái mà không xử lý
+function checkStatusOnly() {
+  console.log('🔍 CHECKING SEGMENTATION STATUS ONLY')
+  console.log(`📂 Source: ${SRC_DIR}`)
+  console.log(`📂 Output: ${OUT_DIR}`)
+  console.log(`🎯 Target lengths: ${SEGMENT_LENGTHS.join(', ')} seconds + others`)
+
+  // Hiển thị thống kê chi tiết về tình trạng xử lý
+  console.log(`\n📊 PROCESSING STATUS:`)
+  const stats = getProcessingStats()
+  console.log(`   📁 Total folders: ${stats.totalFolders}`)
+  console.log(`   ✅ Already processed: ${stats.processedFolders}`)
+  console.log(`   🔄 Need processing: ${stats.unprocessedFolders}`)
+
+  if (stats.processedFolders > 0) {
+    console.log(`\n📋 Processed folders (${stats.processedFolders}):`)
+    stats.processedFoldersList.forEach((folder) => {
+      console.log(`   ✅ ${folder}`)
+    })
+  }
+
+  if (stats.unprocessedFolders > 0) {
+    console.log(`\n📋 Folders to process (${stats.unprocessedFolders}):`)
+    stats.unprocessedFoldersList.forEach((folder) => {
+      console.log(`   🔄 ${folder}`)
+    })
+  }
+
+  // Hiển thị segment distribution hiện tại
+  console.log(`\n� Current segment distribution:`)
+  let totalSegments = 0
+  FOLDERS.forEach((folder) => {
+    const folderPath = path.join(OUT_DIR, folder)
+    if (fs.existsSync(folderPath)) {
+      const files = fs.readdirSync(folderPath).filter((f) => f.endsWith('.wav'))
+      console.log(`   ${folder}: ${files.length} segments`)
+      totalSegments += files.length
+    } else {
+      console.log(`   ${folder}: 0 segments`)
+    }
+  })
+  console.log(`📊 Total segments: ${totalSegments}`)
+
+  if (stats.unprocessedFolders === 0) {
+    console.log('\n🎉 All folders have been processed!')
+  } else {
+    console.log(`\n🚀 Ready to process ${stats.unprocessedFolders} remaining folders`)
+    console.log('� Run the script without --status flag to start processing')
   }
 }
 
-processAll()
+// Kiểm tra command line arguments
+const args = process.argv.slice(2)
+if (args.includes('--status') || args.includes('-s')) {
+  checkStatusOnly()
+} else {
+  processAll()
+}

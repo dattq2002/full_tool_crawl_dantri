@@ -5,7 +5,9 @@
   "scripts": {
     "crawl": "node crawler_auto_download_audio/crawler.js",
     "segment": "node crawler_auto_download_audio/extract_random_segments.js",
-    "python": "python Speech_to_Text_tool/audio_processor.py"
+    "stt": "node crawler_auto_download_audio/azure_speech_sdk.js",
+    "prompt": "node crawler_auto_download_audio/fix_prompt_file_V2.js",
+    "cp": "node crawler_auto_download_audio/check_prompt.js"
   },
   "keywords": [],
   "author": "",
