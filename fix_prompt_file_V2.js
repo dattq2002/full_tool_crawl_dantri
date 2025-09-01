@@ -419,9 +419,9 @@ function fixPromptFileV2(promptPath, audiosDir, logPath) {
 
 // Main execution with cache support
 if (require.main === module) {
-  const promptPath = path.resolve(__dirname, '../prompt_V2.txt')
-  const audiosDir = path.resolve(__dirname, '../dantri_audios')
-  const logPath = path.resolve(__dirname, '../fix_prompt_log_V2.txt')
+  const promptPath = path.resolve(__dirname, 'prompt_V2.txt')
+  const audiosDir = path.resolve(__dirname, 'dantri_audios')
+  const logPath = path.resolve(__dirname, 'fix_prompt_log_V2.txt')
 
   fixPromptFileV2(promptPath, audiosDir, logPath)
 }

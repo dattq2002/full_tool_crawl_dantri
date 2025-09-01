@@ -224,9 +224,9 @@ function numericDatesToSpaces(text) {
 
 // Main execution
 if (require.main === module) {
-  const promptFixedPath = path.resolve(__dirname, '../prompt_fixed_V2.txt')
-  const audiosDir = path.resolve(__dirname, '../dantri_audios')
-  const logPath = path.resolve(__dirname, '../check_prompt_matching_log.txt')
+  const promptFixedPath = path.resolve(__dirname, 'prompt_fixed_V2.txt')
+  const audiosDir = path.resolve(__dirname, 'dantri_audios')
+  const logPath = path.resolve(__dirname, 'check_prompt_matching_log.txt')
 
   console.log(`📁 Prompt file: ${promptFixedPath}`)
   console.log(`📁 Audios dir: ${audiosDir}`)

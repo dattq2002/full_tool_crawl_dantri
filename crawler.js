@@ -6,8 +6,8 @@ const { exec } = require('child_process')
 
 // ===== CẤU HÌNH CHÍNH =====
 const CATEGORIES = [
-  // { name: 'xa-hoi', url: 'xa-hoi' },
-  // { name: 'kinh-doanh', url: 'kinh-doanh' }
+  { name: 'xa-hoi', url: 'xa-hoi' },
+  { name: 'kinh-doanh', url: 'kinh-doanh' },
   { name: 'giai-tri', url: 'giai-tri' },
   { name: 'suc-khoe', url: 'suc-khoe' },
   { name: 'cong-nghe', url: 'cong-nghe' },
@@ -29,7 +29,7 @@ const CONFIG = {
   REQUEST_TIMEOUT: 10000
 }
 
-const SAVE_DIR = path.join(__dirname, '..', 'dantri_audios')
+const SAVE_DIR = path.join(__dirname, 'dantri_audios')
 
 // Headers chuẩn để tránh bị block
 const DEFAULT_HEADERS = {

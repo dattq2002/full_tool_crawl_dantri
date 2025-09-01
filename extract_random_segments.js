@@ -2,8 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 
-const SRC_DIR = path.join(__dirname, '..', 'dantri_audios')
-const OUT_DIR = path.join(__dirname, '..', 'dantri_segments')
+const SRC_DIR = path.join(__dirname, 'dantri_audios')
+const OUT_DIR = path.join(__dirname, 'dantri_segments')
 const REPORTS_DIR = path.join(OUT_DIR, 'reports')
 
 // Các độ dài segment cố định

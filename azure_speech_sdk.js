@@ -11,7 +11,7 @@ speechConfig.speechRecognitionLanguage = 'vi-VN'
 
 class AzureAudioProcessor {
   constructor() {
-    this.baseDir = path.join(__dirname, '..')
+    this.baseDir = path.join(__dirname)
     this.segmentsDir = path.join(this.baseDir, 'dantri_segments')
     this.promptFilePath = path.join(this.baseDir, 'prompt_V2.txt')
   }

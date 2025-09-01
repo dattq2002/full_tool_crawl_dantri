@@ -109,6 +109,21 @@ brew install ffmpeg
 
 ## 🎯 Hướng dẫn sử dụng
 
+### Chạy toàn bộ pipeline một lần
+
+```bash
+# Chạy tất cả các bước tự động
+npm run run-all
+```
+
+- Thu thập audio từ Dân trí
+- Phân đoạn audio thành segments
+- Speech-to-Text với Azure
+- Sửa lỗi prompts
+- Kiểm tra chất lượng prompts
+
+### Hoặc chạy từng bước riêng lẻ
+
 ### Bước 1: Thu thập dữ liệu audio
 
 ```bash
@@ -168,6 +183,7 @@ npm run cp
 
 | Script            | Lệnh                              | Mô tả                     |
 | ----------------- | --------------------------------- | ------------------------- |
+| `npm run run-all` | `node run_all.js`                 | **Chạy toàn bộ pipeline** |
 | `npm run crawl`   | `node crawler.js`                 | Thu thập audio từ Dân trí |
 | `npm run segment` | `node extract_random_segments.js` | Phân đoạn audio           |
 | `npm run stt`     | `node azure_speech_sdk.js`        | Speech-to-Text            |
@@ -197,14 +213,14 @@ const CONFIG = {
   DELAY_BETWEEN_ARTICLES: 500, // Delay giữa các bài (ms)
   DELAY_BETWEEN_CATEGORIES: 2000, // Delay giữa các danh mục (ms)
   DELAY_BETWEEN_VOICES: 200, // Delay giữa các giọng (ms)
-  REQUEST_TIMEOUT: 10000, // Timeout request (ms)
-};
+  REQUEST_TIMEOUT: 10000 // Timeout request (ms)
+}
 ```
 
 ### extract_random_segments.js - Cấu hình segmentation
 
 ```javascript
-const SEGMENT_LENGTHS = [3, 5, 7, 10]; // Độ dài segments (giây)
+const SEGMENT_LENGTHS = [3, 5, 7, 10] // Độ dài segments (giây)
 ```
 
 ### fix_prompt_file_V2.js - Cấu hình prompt fixing
@@ -217,9 +233,9 @@ const result = autoMataCorrect(prompt, cleanTranscript, {
     // Trọng số vị trí
     start: 0.35,
     middle: 0.3,
-    end: 0.35,
-  },
-});
+    end: 0.35
+  }
+})
 ```
 
 ## 📈 Workflow hoàn chỉnh
